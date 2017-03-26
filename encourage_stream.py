@@ -56,7 +56,7 @@ class ProcrastinateStreamListener(ty.StreamListener):
             time = arrow.now("US/Central").format("D HH:mm")
             if time[-2::] == "00" or time[-2::] == "10" or time[-2::] == "20" or time[-2::] == "40" or time[-2::] == "50":
                 count = 0
-            if count < 10:
+            if count < 5:
                 reply = rando_messages[random.randint(0, len(rando_messages) - 1)]
                 reply_tweet = "@{} " + reply
                 reply_tweet = reply_tweet.format(user)
