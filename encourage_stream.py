@@ -20,59 +20,61 @@ class ProcrastinateStreamListener(ty.StreamListener):
         super(ty.StreamListener, self).__init__()
         #add gabbs, spook, elias, and i for now
         self.users = {'1000747464' : 0, '479991180' : 0, '3035238043' : 0, '775783928720351234' : 0}
+        self.count = 0
 
     def on_data(self, data):
         data = json.loads(data)
         self.respond(data)
 
     def on_error(self, status):
-        # if status_code == 420:
-        #     #JUST...............SLEEP
-        #     time.sleep(900)
-        print(status)
+        print(status) #nice
 
     def respond(self, data): 
         """
             *snaps* let's tell people not to procrastinate!!!
         """
-        #print(data['user']['screen_name'] + ": "+ data['text'])
-        # print(data)
-        user = data['user']['screen_name']
-        user_id = str(data['user']['id'])
-        text = data['text']
-        count = 0
+        try: 
+            user = data['user']['screen_name']
+            user_id = str(data['user']['id'])
+            text = data['text']
+            tweet_id = data['id']
+        except Exception: 
+            #TO DO: look into why this might fail
+            return 
+
+        # check to see if a user needs help
+        if "help" in text.lower() and "@procrasti_bot2" in text.lower(): 
+            self.help(user_id, tweet_id)
 
         # avoid getting into an infinite loop with the bot at all costs
         if user == 'procrasti_bot2':
             return
-        tweet_id = data['id']
 
         if user_id in self.users: 
             self.users[user_id] += 1
             if(self.users[user_id] == 3): 
-                self.shame(user_id, tweet_id)
+                self.help(user_id, tweet_id)
         else: 
-            count+= 1
+            self.count+= 1
             time = arrow.now("US/Central").format("D HH:mm")
+            #reset the counter
             if time[-2::] == "00" or time[-2::] == "10" or time[-2::] == "20" or time[-2::] == "40" or time[-2::] == "50":
-                count = 0
-            if count < 5:
+                self.count = 0
+            if self.count < 5:
                 reply = rando_messages[random.randint(0, len(rando_messages) - 1)]
                 reply_tweet = "@{} " + reply
                 reply_tweet = reply_tweet.format(user)
                 api.update_status(status=reply_tweet, in_reply_to_status_id=tweet_id)
 
-    def shame(self, user_id, tweet_id): 
+    def help(self, user_id, tweet_id): 
         # reset counter 
-        self.users[user_id] = 0
+        if user_id in self.users: 
+            self.users[user_id] = 0
         user = api.get_user(id = user_id).screen_name
         message = warning_messages[random.randint(0, len(warning_messages) - 1)]
         tweet = "@{} " + message
         tweet = tweet.format(user)
         api.update_status(status=tweet, in_reply_to_status_id=tweet_id)
-
-    def add_user(self, user_id): 
-        pass
 
 def set_twitter_auth():
     """
@@ -88,4 +90,4 @@ if __name__ == "__main__":
     api = set_twitter_auth()
     procrastinateStreamListener = ProcrastinateStreamListener(api)
     procrastinateStream = ty.Stream(auth = api.auth, listener=procrastinateStreamListener)
-    procrastinateStream.filter(track=['procrastinate, procrastination, procrastinating'], follow=procrastinateStreamListener.users, async = True)
+    procrastinateStream.filter(track=['procrastinating', '@procrasti-bot2 help'], follow=procrastinateStreamListener.users, async = True)

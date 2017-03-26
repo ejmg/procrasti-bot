@@ -6,7 +6,7 @@
 import tweepy as ty
 from procrastibotSecrets import *
 from procrasti_bot_messages import automated_messages
-
+import random
 
 def setTwitterAuth():
     """
