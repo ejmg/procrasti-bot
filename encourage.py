@@ -35,7 +35,7 @@ def deleteOldTweets(api, tweet):
     delete any any tweet that is a duplicate of the tweet in the last
     96 tweets. 
     """
-    oldTweets = api.user_timeline("@procrasti_bot", count=96)
+    oldTweets = api.user_timeline("@procrasti_bot2", count=96)
     for old in oldTweets:
         if old.text == tweet:
             api.destroy_status(old.id)
