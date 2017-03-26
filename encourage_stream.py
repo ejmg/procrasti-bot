@@ -7,7 +7,8 @@
 import tweepy as ty
 import json
 import random
-import time
+import datetime
+import arrow
 from procrastibotSecrets import *
 from procrasti_bot_messages import rando_messages, warning_messages
 
@@ -39,6 +40,7 @@ class ProcrastinateStreamListener(ty.StreamListener):
         user = data['user']['screen_name']
         user_id = str(data['user']['id'])
         text = data['text']
+        count = 0
 
         # avoid getting into an infinite loop with the bot at all costs
         if user == 'procrasti_bot':
@@ -50,11 +52,14 @@ class ProcrastinateStreamListener(ty.StreamListener):
             if(self.users[user_id] == 3): 
                 self.shame(user_id, tweet_id)
         else: 
-            # reply = rando_messages[random.randint(0, len(rando_messages) - 1)]
-            # reply_tweet = "@{} " + reply
-            # reply_tweet = reply_tweet.format(user)
-            # api.update_status(status=reply_tweet, in_reply_to_status_id=tweet_id)
-            pass
+            count+= 1
+            if time[-2::] == "00" || time[-2::] == "10" || time[-2::] == "20" || time[-2::] == "40" || time[-2::] == "50":
+                count == 0
+            if count < 10:
+                reply = rando_messages[random.randint(0, len(rando_messages) - 1)]
+                reply_tweet = "@{} " + reply
+                reply_tweet = reply_tweet.format(user)
+                api.update_status(status=reply_tweet, in_reply_to_status_id=tweet_id)
 
     def shame(self, user_id, tweet_id): 
         # reset counter 
