@@ -7,6 +7,7 @@
 import tweepy as ty
 import json
 import random
+import time
 from procrastibotSecrets import *
 
 #override tweepy.StreamListener class
@@ -21,13 +22,17 @@ class ProcrastinateStreamListener(ty.StreamListener):
         self.respond(data)
 
     def on_error(self, status):
-        print(status)
+        # if status_code == 420:
+        #     #JUST...............SLEEP
+        #     time.sleep(900)
+        return False
 
     def respond(self, data): 
         """
             pick a way to respond, you fuck
         """
         #print(data['user']['screen_name'] + ": "+ data['text'])
+        # print(data)
         user = data['user']['screen_name']
 
          # avoid getting into an infinite loop with the bot at all costs
@@ -36,11 +41,12 @@ class ProcrastinateStreamListener(ty.StreamListener):
         tweet_id = data['id']
 
         if user == 'frescopaintings': 
-            reply = "stop procrastinating " + str(random.randint(0, 1000)) #YES
-            reply_tweet = "@{} " + reply
-            reply_tweet = reply_tweet.format(user)
-            print(reply_tweet)
-            api.update_status(status=reply_tweet, in_reply_to_status_id=tweet_id)
+            # reply = "stop procrastinating " + str(random.randint(0, 1000)) #YES
+            # reply_tweet = "@{} " + reply
+            # reply_tweet = reply_tweet.format(user)
+            # print(reply_tweet)
+            # api.update_status(status=reply_tweet, in_reply_to_status_id=tweet_id)
+            print("you tweeted")
 
 def set_twitter_auth():
     """
@@ -56,4 +62,6 @@ if __name__ == "__main__":
     api = set_twitter_auth()
     procrastinateStreamListener = ProcrastinateStreamListener(api)
     procrastinateStream = ty.Stream(auth = api.auth, listener=procrastinateStreamListener)
-    procrastinateStream.filter(track=['procrastinate, procrastination, procrastinating'])
+    me = api.get_user(screen_name = 'frescopaintings')
+    print(me.id)
+    procrastinateStream.filter(track=['procrastinate, procrastination, procrastinating'], follow=[str(me.id)], async = True)
