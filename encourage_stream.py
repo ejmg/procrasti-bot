@@ -43,7 +43,7 @@ class ProcrastinateStreamListener(ty.StreamListener):
         count = 0
 
         # avoid getting into an infinite loop with the bot at all costs
-        if user == 'procrasti_bot':
+        if user == 'procrasti_bot2':
             return
         tweet_id = data['id']
 
@@ -53,8 +53,9 @@ class ProcrastinateStreamListener(ty.StreamListener):
                 self.shame(user_id, tweet_id)
         else: 
             count+= 1
-            if time[-2::] == "00" || time[-2::] == "10" || time[-2::] == "20" || time[-2::] == "40" || time[-2::] == "50":
-                count == 0
+            time = arrow.now("US/Central").format("D HH:mm")
+            if time[-2::] == "00" or time[-2::] == "10" or time[-2::] == "20" or time[-2::] == "40" or time[-2::] == "50":
+                count = 0
             if count < 10:
                 reply = rando_messages[random.randint(0, len(rando_messages) - 1)]
                 reply_tweet = "@{} " + reply
