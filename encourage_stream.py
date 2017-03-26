@@ -9,6 +9,7 @@ import json
 import random
 import time
 from procrastibotSecrets import *
+from procrasti_bot_messages import rando_messages, warning_messages
 
 #override tweepy.StreamListener class
 class ProcrastinateStreamListener(ty.StreamListener):
@@ -16,6 +17,8 @@ class ProcrastinateStreamListener(ty.StreamListener):
     def __init__(self, api):
         self.api = api
         super(ty.StreamListener, self).__init__()
+        #add gabbs, spook, elias, and i for now
+        self.users = {'1000747464' : 0, '479991180' : 0, '3035238043' : 0, '775783928720351234' : 0}
 
     def on_data(self, data):
         data = json.loads(data)
@@ -25,28 +28,45 @@ class ProcrastinateStreamListener(ty.StreamListener):
         # if status_code == 420:
         #     #JUST...............SLEEP
         #     time.sleep(900)
-        return False
+        print(status)
 
     def respond(self, data): 
         """
-            pick a way to respond, you fuck
+            *snaps* let's tell people not to procrastinate!!!
         """
         #print(data['user']['screen_name'] + ": "+ data['text'])
         # print(data)
         user = data['user']['screen_name']
+        user_id = str(data['user']['id'])
+        text = data['text']
 
-         # avoid getting into an infinite loop with the bot at all costs
+        # avoid getting into an infinite loop with the bot at all costs
         if user == 'procrasti_bot':
             return
         tweet_id = data['id']
 
-        if user == 'frescopaintings': 
-            # reply = "stop procrastinating " + str(random.randint(0, 1000)) #YES
+        if user_id in self.users: 
+            self.users[user_id] += 1
+            if(self.users[user_id] == 3): 
+                self.shame(user_id, tweet_id)
+        else: 
+            # reply = rando_messages[random.randint(0, len(rando_messages) - 1)]
             # reply_tweet = "@{} " + reply
             # reply_tweet = reply_tweet.format(user)
-            # print(reply_tweet)
             # api.update_status(status=reply_tweet, in_reply_to_status_id=tweet_id)
-            print("you tweeted")
+            pass
+
+    def shame(self, user_id, tweet_id): 
+        # reset counter 
+        self.users[user_id] = 0
+        user = api.get_user(id = user_id).screen_name
+        message = warning_messages[random.randint(0, len(warning_messages) - 1)]
+        tweet = "@{} " + message
+        tweet = tweet.format(user)
+        api.update_status(status=tweet, in_reply_to_status_id=tweet_id)
+
+    def add_user(self, user_id): 
+        pass
 
 def set_twitter_auth():
     """
@@ -62,6 +82,4 @@ if __name__ == "__main__":
     api = set_twitter_auth()
     procrastinateStreamListener = ProcrastinateStreamListener(api)
     procrastinateStream = ty.Stream(auth = api.auth, listener=procrastinateStreamListener)
-    me = api.get_user(screen_name = 'frescopaintings')
-    print(me.id)
-    procrastinateStream.filter(track=['procrastinate, procrastination, procrastinating'], follow=[str(me.id)], async = True)
+    procrastinateStream.filter(track=['procrastinate, procrastination, procrastinating'], follow=procrastinateStreamListener.users, async = True)
